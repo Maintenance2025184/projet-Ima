@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase, Intervention } from '../lib/supabase';
-import { ArrowLeft, Users, Settings, TrendingUp, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { LogOut, Users, Settings, TrendingUp, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { InterventionDetails } from '../components/InterventionDetails';
 import { EquipmentManagement } from '../components/EquipmentManagement';
 import { LocationManagement } from '../components/LocationManagement';
 
 type View = 'dashboard' | 'interventions' | 'equipment' | 'locations';
 
-type TechnicianPageProps = {
-  onChangeRole: () => void;
-};
-
-export function TechnicianPage({ onChangeRole }: TechnicianPageProps) {
+export function TechnicianPage() {
+  const { user, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [interventions, setInterventions] = useState<Intervention[]>([]);
   const [selectedIntervention, setSelectedIntervention] = useState<Intervention | null>(null);
@@ -52,10 +50,9 @@ export function TechnicianPage({ onChangeRole }: TechnicianPageProps) {
   };
 
   const handleAssignToMe = async (interventionId: string) => {
-    const technicianId = Math.random().toString(36).substr(2, 9);
     await supabase
       .from('interventions')
-      .update({ technician_id: technicianId, status: 'assigned' })
+      .update({ technician_id: user?.id, status: 'assigned' })
       .eq('id', interventionId);
 
     setRefreshTrigger((prev) => prev + 1);
@@ -130,13 +127,16 @@ export function TechnicianPage({ onChangeRole }: TechnicianPageProps) {
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Équipe de Maintenance</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Équipe de Maintenance</h1>
+              <p className="text-sm text-gray-600">Connecté en tant que: {user?.email}</p>
+            </div>
             <button
-              onClick={onChangeRole}
+              onClick={signOut}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Changer de rôle</span>
+              <LogOut className="w-5 h-5" />
+              <span>Déconnexion</span>
             </button>
           </div>
         </div>

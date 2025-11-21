@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Wrench } from 'lucide-react';
 
-type LoginPageProps = {
-  onLoginSuccess: () => void;
-};
-
-export function LoginPage({ onLoginSuccess }: LoginPageProps) {
+export function LoginPage() {
   const { signIn, signUp } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,7 +25,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       } else {
         await signIn(formData.email, formData.password);
       }
-      onLoginSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {

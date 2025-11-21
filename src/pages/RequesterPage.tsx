@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase, Intervention } from '../lib/supabase';
-import { Plus, ArrowLeft, Eye, Trash2, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Plus, LogOut, Eye, Trash2, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { InterventionForm } from '../components/InterventionForm';
 import { InterventionDetails } from '../components/InterventionDetails';
 
-type RequesterPageProps = {
-  onChangeRole: () => void;
-};
-
-export function RequesterPage({ onChangeRole }: RequesterPageProps) {
+export function RequesterPage() {
+  const { user, signOut } = useAuth();
   const [interventions, setInterventions] = useState<Intervention[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedIntervention, setSelectedIntervention] = useState<Intervention | null>(null);
@@ -24,6 +22,7 @@ export function RequesterPage({ onChangeRole }: RequesterPageProps) {
     const { data } = await supabase
       .from('interventions')
       .select('*')
+      .eq('requester_id', user?.id)
       .order('requested_date', { ascending: false });
 
     if (data) setInterventions(data);
@@ -90,13 +89,16 @@ export function RequesterPage({ onChangeRole }: RequesterPageProps) {
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Mes Demandes de Maintenance</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Mes Demandes de Maintenance</h1>
+              <p className="text-sm text-gray-600">Connecté en tant que: {user?.email}</p>
+            </div>
             <button
-              onClick={onChangeRole}
+              onClick={signOut}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Changer de rôle</span>
+              <LogOut className="w-5 h-5" />
+              <span>Déconnexion</span>
             </button>
           </div>
         </div>
